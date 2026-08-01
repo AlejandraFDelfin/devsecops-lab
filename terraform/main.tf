@@ -19,6 +19,7 @@ resource "aws_security_group" "sg_seguro" {
   description = "Grupo de seguridad restringido para lab"
 
   ingress {
+    description = "Permitir SSH solamente desde red privada"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
