@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: alejandrafdelfin/devsecops-lab
+      IMAGE_NAME: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
 
@@ -120,14 +120,18 @@ jobs:
           exit-code: '1'
 
       - name: Publicar Imagen en GHCR
-        uses: docker/build-push-action@v5
+        id: push-image
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+
       - name: Guardar digest
         run: |
+          echo "${{ steps.push-image.outputs.digest }}"
           echo "${{ steps.push-image.outputs.digest }}" > digest.txt
+          cat digest.txt
 
       - name: Subir digest
         uses: actions/upload-artifact@v4
@@ -143,7 +147,7 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: alejandrafdelfin/devsecops-lab
+      IMAGE_NAME: ${{ github.repository }}
 
     steps:
       - name: Instalar Cosign
