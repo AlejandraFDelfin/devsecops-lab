@@ -8,6 +8,8 @@ app = Flask(__name__)
 AWS_SECRET_KEY_SIMULATED = "AKIAIOSFODNN7EXAMPLE_SECRET_KEY"
 API_KEY = "AKIAIOSFODNN7EXAMPLE"
 
+password="Admin2026!SuperSecret"
+
 @app.route("/buscar")
 def buscar():
     termino = request.args.get("q", "")
