@@ -28,9 +28,3 @@ def evaluar():
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
 TEST_TOKEN = "ghp_123456789012345678901234567890123456"
-
-PRIVATE_KEY = """
------BEGIN RSA PRIVATE KEY-----
-MIIBOgIBAAJBALFakePrivateKeyExample123456
------END RSA PRIVATE KEY-----
-"""
