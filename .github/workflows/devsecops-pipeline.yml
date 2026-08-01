@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
+      IMAGE_NAME: alejandrafdelfin/devsecops-lab
     steps:
       - uses: actions/checkout@v4
 
@@ -89,7 +89,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: type=sha
+          tags: |
+            type=sha
 
       - name: Compilar Imagen Docker Local
         uses: docker/build-push-action@v5
@@ -130,9 +131,11 @@ jobs:
     name: 6. Firma de Artefacto (Cosign Keyless)
     needs: build-and-sbom
     runs-on: ubuntu-latest
+
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
+      IMAGE_NAME: alejandrafdelfin/devsecops-lab
+
     steps:
       - name: Instalar Cosign
         uses: sigstore/cosign-installer@v3.5.0
@@ -145,6 +148,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Firmar Imagen mediante Sigstore (OIDC Keyless)
+        env:
+          IMAGE_REF: ghcr.io/alejandrafdelfin/devsecops-lab:sha-${{ github.sha }}
         run: |
-          IMAGE_REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
+          echo "Firmando imagen: $IMAGE_REF"
           cosign sign --yes "$IMAGE_REF"
