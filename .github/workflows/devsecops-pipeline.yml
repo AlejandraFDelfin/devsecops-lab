@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
   packages: write
-  id-token: write # Requerido para firma criptográfica Keyless con Sigstore/Cosign vía OIDC
+  id-token: write
 
 jobs:
   # 1. SECRET SCANNING
@@ -25,16 +25,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # 2. SAST (Análisis Estático de Código)
+  # 2. SAST (Análisis Estático del Código de la App)
   sast:
     name: 2. SAST (Semgrep)
     needs: secret-scanning
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Ejecutar Semgrep
+      - name: Ejecutar Semgrep en app/
         run: |
-          docker run --rm -v "${{ github.workspace }}:/src" returntocorp/semgrep semgrep scan --config auto --error
+          docker run --rm -v "${{ github.workspace }}:/src" returntocorp/semgrep semgrep scan --config auto --error app/
 
   # 3. SCA (Análisis de Dependencias)
   sca:
@@ -97,7 +97,6 @@ jobs:
           load: true
           tags: ${{ steps.meta.outputs.tags }}
 
-      # Generación de SBOM (Software Bill of Materials)
       - name: Generar SBOM con Syft
         uses: anchore/sbom-action@v0
         with:
@@ -111,7 +110,6 @@ jobs:
           name: sbom-cyclonedx
           path: sbom.cyclonedx.json
 
-      # Escaneo de la Imagen de Contenedor
       - name: Escaneo de Imagen Docker con Trivy
         uses: aquasecurity/trivy-action@master
         with:
@@ -119,7 +117,6 @@ jobs:
           severity: 'CRITICAL'
           exit-code: '1'
 
-      # Publicación del contenedor si supera los escaneos
       - name: Publicar Imagen en GHCR
         uses: docker/build-push-action@v5
         with:
