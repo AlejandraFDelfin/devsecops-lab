@@ -125,6 +125,15 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+      - name: Guardar digest
+        run: |
+          echo "${{ steps.push-image.outputs.digest }}" > digest.txt
+
+      - name: Subir digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-digest
+          path: digest.txt
 
   # 6. FIRMA CRIPTOGRÁFICA DE CONTENEDORES
   sign-container:
@@ -146,10 +155,18 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Descargar digest
+        uses: actions/download-artifact@v4
+        with:
+          name: image-digest
 
       - name: Firmar Imagen mediante Sigstore (OIDC Keyless)
-        env:
-          IMAGE_REF: ghcr.io/alejandrafdelfin/devsecops-lab:sha-${{ github.sha }}
         run: |
-          echo "Firmando imagen: $IMAGE_REF"
+          DIGEST=$(cat digest.txt)
+
+          IMAGE_REF="ghcr.io/alejandrafdelfin/devsecops-lab@$DIGEST"
+
+          echo "Firmando:"
+          echo "$IMAGE_REF"
+
           cosign sign --yes "$IMAGE_REF"
