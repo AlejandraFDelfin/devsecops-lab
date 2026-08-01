@@ -1,16 +1,14 @@
-# Imagen base moderna y actualizada
 FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-# Crear usuario no privilegiado
 RUN useradd -m appuser
 
-COPY requirements.txt .
+COPY app/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ /app/
+COPY app/ .
 
 USER appuser
 
