@@ -19,9 +19,23 @@ resource "aws_security_group" "sg_seguro" {
   description = "Grupo de seguridad restringido para lab"
 
   ingress {
+    description = "Acceso SSH solo desde red interna del laboratorio"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+
+resource "aws_instance" "servidor_lab" {
+  ami           = "ami-0c02fb55956c7d316"
+  instance_type = "t2.micro"
+
+  vpc_security_group_ids = [
+    aws_security_group.sg_seguro.id
+  ]
+
+  tags {
+    Name = "devsecops-lab"
   }
 }
