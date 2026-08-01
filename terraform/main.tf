@@ -19,41 +19,30 @@ resource "aws_security_group" "sg_seguro" {
   description = "Grupo de seguridad restringido para lab"
 
   ingress {
-    description = "SSH interno solamente"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
   }
-
-  egress {
-    description = "Salida HTTPS permitida"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 resource "aws_iam_role" "ec2_role" {
-  name = "devsecops-ec2-role"
+  name = "ec2-devsecops-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
       }
-    ]
+      Action = "sts:AssumeRole"
+    }]
   })
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "devsecops-profile"
+  name = "ec2-devsecops-profile"
   role = aws_iam_role.ec2_role.name
 }
 
@@ -64,8 +53,6 @@ resource "aws_instance" "servidor_lab" {
   vpc_security_group_ids = [
     aws_security_group.sg_seguro.id
   ]
-
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   monitoring = true
 
@@ -78,6 +65,8 @@ resource "aws_instance" "servidor_lab" {
   root_block_device {
     encrypted = true
   }
+
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   tags = {
     Name = "devsecops-lab"
